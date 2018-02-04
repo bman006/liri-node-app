@@ -1,8 +1,9 @@
 require("dotenv").config();
+var fs = require(`fs`);
 var keys = require(`./keys.js`);
 var Twitter = require('twitter');
 var Spotify = require('node-spotify-api');
-var fs = require(`fs`);
+var request = require('request');
 
 //my-tweets----------------node liri.js my-tweets--------------------------------//
 function myTweets() {
@@ -72,6 +73,45 @@ function spotifyThisSong() {
 //-------------------------------------------------------------------------------//
 
 //movie-this---------------node liri.js movie-this '<movie name here>'-----------//
+var movieToSearch = process.argv[2];
+var requestURLOMDB = `http://www.omdbapi.com/?apikey=${keys.OMDB.key}&t=${movieToSearch}`
+request(requestURLOMDB, function (error, response, body) {
+    if (response.statusCode != 200) {
+        console.log('error:', error); // Print the error if one occurred
+        console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+    }
+    else {
+        //Parse response
+        var movieResponse = JSON.parse(body);
+        //Get all wanted values from JSON response
+        var title = movieResponse.Title;
+        var year = movieResponse.Year;
+        for (var i = 0; i < movieResponse.Ratings.length; i++) {
+            var thisOne = movieResponse.Ratings[i];
+            if (thisOne.Source === `Internet Movie Database`) {
+                var ratingIMDB = thisOne.Value;
+            }
+            else if (thisOne.Source === `Rotten Tomatoes`) {
+                var ratingRT = thisOne.Value;
+            }
+        }
+        var country = movieResponse.Country;
+        var language = movieResponse.Language;
+        var plot = movieResponse.Plot;
+        var actors = movieResponse.Actors;
+        displayOMDBInfo(title, year, ratingIMDB, ratingRT, country, language, plot, actors);
+    }
+});
+function displayOMDBInfo(title, year, ratingIMDB, ratingRT, country, language, plot, actors) {
+    console.log(`Title:                     ${title}`);
+    console.log(`Year:                      ${year}`);
+    console.log(`IMDB Rating:               ${ratingIMDB}`);
+    console.log(`Rotten Tomatoes Rating:    ${ratingRT}`);
+    console.log(`Country:                   ${country}`);
+    console.log(`Language:                  ${language}`);
+    console.log(`Plot:                      ${plot}`);
+    console.log(`Actors:                    ${actors}`);
+}
 //-------------------------------------------------------------------------------//
 
 //do-what-it-says----------node liri.js do-what-it-says--------------------------//
