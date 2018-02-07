@@ -70,8 +70,7 @@ function spotifyThisSong(track) {
 }
 //Fetch a default song stored in a .txt file
 function useDefaultSong() {
-    var defaultSong;
-    fs.readFile(`defaultSpotifySong.txt`, `utf8`, function(error, data) {
+    fs.readFile(`defaultSong.txt`, `utf8`, function(error, data) {
         spotifySearch(data);
     });
 }
@@ -104,6 +103,15 @@ function displaySpotifyInfo(artist, track, link, album) {
 //------------------------------------------------------------------------------//
 //movie this---------------node liri.js movie-this '<movie name here>'-----------//
 function movieThis(movie) {
+    //Set default movie and/or enter user input into variable
+    if (movie === undefined) {
+        useDefaultMovie();
+    }
+    else {
+        movieSearch(movie);
+    }
+}
+function movieSearch(movie) {
     var queryURL = `http://www.omdbapi.com/?apikey=${keys.OMDB.key}&t=${movie}`
     request(queryURL, function (error, response, body) {
         if (response.statusCode != 200) {
@@ -136,6 +144,11 @@ function movieThis(movie) {
                 displayOMDBInfo(title, year, ratingIMDB, ratingRT, country, language, plot, actors);
             }
         }
+    });
+}
+function useDefaultMovie() {
+    fs.readFile(`defaultmovie.txt`, `utf8`, function(error, data) {
+        movieSearch(data);
     });
 }
 function displayOMDBInfo(title, year, ratingIMDB, ratingRT, country, language, plot, actors) {
